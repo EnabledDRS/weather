@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#041b2d">
+  <meta name="description" content="기상청 AWS 관측, 특보, 레이더와 위성영상을 한 화면에서 확인하는 Weather Desk">
+  <title>Weather Desk | 기상 관제 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="monitor-shell">
+    <header class="monitor-topbar">
+      <a class="monitor-brand" href="#dashboard" aria-label="Weather Desk 홈">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span><small>KOREA WEATHER MONITOR</small>WEATHER DESK</span>
+      </a>
+      <div class="monitor-clock" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <strong id="dataMode">시연 데이터</strong>
+        <time id="updatedAt">업데이트 중</time>
+      </div>
+    </header>
+
+    <section class="situation-board" id="dashboard" aria-label="기상 상황판">
+      <article class="monitor-panel warning-panel" id="warnings">
+        <header class="panel-head">
+          <div><span class="panel-number">01</span><h2>전국 기상특보</h2></div>
+          <span class="status-line"><i></i> 발효 기준</span>
+        </header>
+        <div class="warning-map">
+          <img id="warningImage" src="/api/warnings" alt="전국 기상특보 발효 현황 지도" decoding="async">
+          <div class="map-placeholder" id="mapPlaceholder">
+            <div class="radar-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+            <strong>전국 특보 지도</strong>
+            <p>기상특보 자료를 불러오고 있습니다.</p>
+          </div>
+        </div>
+        <footer class="panel-footer">
+          <span>기상청 특보 현황 · 5분 자동 갱신</span>
+          <button id="mapRefresh" type="button">새로고침 <span aria-hidden="true">↻</span></button>
+        </footer>
+      </article>
+
+      <article class="monitor-panel radar-panel" id="radar">
+        <header class="panel-head">
+          <div><span class="panel-number">02</span><h2>전국 강수 레이더</h2></div>
+          <span class="radar-meta"><i class="live-dot"></i><span id="radarUpdatedAt">확인 중</span></span>
+        </header>
+        <div class="radar-image-wrap">
+          <img id="radarImage" src="/api/radar?size=400&amp;v=hsp-hso-hb-400" alt="기상청 HSP 전국 강수 레이더 영상" decoding="async">
+          <div class="radar-placeholder" id="radarPlaceholder">
+            <div class="radar-sweep" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div><strong>HSR 강수 레이더</strong><p>과거 프레임을 불러오고 있습니다.</p></div>
+          </div>
+        </div>
+        <footer class="panel-footer">
+          <span>500m 격자 · 5분 간격</span>
+          <button id="radarRefresh" type="button">새로고침 <span aria-hidden="true">↻</span></button>
+        </footer>
+      </article>
+
+      <article class="monitor-panel satellite-panel">
+        <header class="panel-head">
+          <div><span class="panel-number">03</span><h2>천리안 위성</h2></div>
+          <span class="radar-meta"><i class="live-dot"></i><span id="satelliteUpdatedAt">확인 중</span></span>
+        </header>
+        <div class="satellite-image-wrap">
+          <img id="satelliteImage" src="/api/wind-rain" alt="기상청 GK2A 한반도 RGB 합성 위성영상" decoding="async">
+          <div class="satellite-placeholder" id="satellitePlaceholder">
+            <div class="satellite-orbit" aria-hidden="true"><i></i></div>
+            <div><strong>GK2A RGB 합성</strong><p>레이더와 같은 시각의 영상을 불러오고 있습니다.</p></div>
+          </div>
+        </div>
+        <footer class="panel-footer">
+          <span>GK2A · RGB 합성 · 레이더 시각 동기화</span>
+          <time id="satelliteFrameTime">과거 자료 준비 중</time>
+        </footer>
+      </article>
+
+      <article class="monitor-panel playback-panel">
+        <header class="panel-head">
+          <div><span class="panel-number">04</span><h2>영상 재생 제어</h2></div>
+          <span class="panel-badge">4H</span>
+        </header>
+        <div class="radar-frame-info">
+          <span>현재 프레임</span>
+          <time id="radarFrameTime">과거 자료 준비 중</time>
+        </div>
+        <input id="radarTimeSlider" type="range" min="0" max="47" value="0" aria-label="레이더 관측 시각">
+        <div class="radar-playback">
+          <button id="radarSlower" type="button">− 느리게</button>
+          <output id="radarSpeed">0.5초/장</output>
+          <button id="radarFaster" type="button">+ 빠르게</button>
+          <button class="radar-play-button" id="radarPlayPause" type="button">정지</button>
+        </div>
+      </article>
+
+      <article class="monitor-panel station-panel" id="observations">
+        <header class="panel-head">
+          <div><span class="panel-number">05</span><h2>AWS 관측소</h2></div>
+          <span class="station-count" id="stationCount">105개</span>
+        </header>
+        <div class="station-controls">
+          <label>
+            <span>관측 지점</span>
+            <select id="stationSelect" aria-label="관측 지점">
+              <option value="90">속초 (90)</option><option value="93">북춘천 (93)</option>
+              <option value="95">철원 (95)</option><option value="98">동두천 (98)</option>
+              <option value="99">파주 (99)</option><option value="100">대관령 (100)</option>
+              <option value="101">춘천 (101)</option><option value="102">백령도 (102)</option>
+              <option value="104">북강릉 (104)</option><option value="105">강릉 (105)</option>
+              <option value="106">동해 (106)</option><option value="108" selected>서울 (108)</option>
+              <option value="112">인천 (112)</option><option value="114">원주 (114)</option>
+              <option value="115">울릉도 (115)</option><option value="116">관악산 (116)</option>
+              <option value="119">수원 (119)</option><option value="121">영월 (121)</option>
+              <option value="127">충주 (127)</option><option value="129">서산 (129)</option>
+              <option value="130">울진 (130)</option><option value="131">청주 (131)</option>
+              <option value="133">대전 (133)</option><option value="135">추풍령 (135)</option>
+              <option value="136">안동 (136)</option><option value="137">상주 (137)</option>
+              <option value="138">포항 (138)</option><option value="140">군산 (140)</option>
+              <option value="143">대구 (143)</option><option value="146">전주 (146)</option>
+              <option value="152">울산 (152)</option><option value="155">창원 (155)</option>
+              <option value="156">광주 (156)</option><option value="159">부산 (159)</option>
+              <option value="162">통영 (162)</option><option value="165">목포 (165)</option>
+              <option value="168">여수 (168)</option><option value="169">흑산도 (169)</option>
+              <option value="170">완도 (170)</option><option value="172">고창 (172)</option>
+              <option value="174">순천 (174)</option><option value="177">홍성 (177)</option>
+              <option value="184">제주 (184)</option><option value="185">고산 (185)</option>
+              <option value="188">성산 (188)</option><option value="189">서귀포 (189)</option>
+              <option value="192">진주 (192)</option><option value="201">강화 (201)</option>
+              <option value="202">양평 (202)</option><option value="203">이천 (203)</option>
+              <option value="211">인제 (211)</option><option value="212">홍천 (212)</option>
+              <option value="216">태백 (216)</option><option value="217">정선군 (217)</option>
+              <option value="221">제천 (221)</option><option value="226">보은 (226)</option>
+              <option value="232">천안 (232)</option><option value="235">보령 (235)</option>
+              <option value="236">부여 (236)</option><option value="238">금산 (238)</option>
+              <option value="239">세종 (239)</option><option value="243">부안 (243)</option>
+              <option value="244">임실 (244)</option><option value="245">정읍 (245)</option>
+              <option value="247">남원 (247)</option><option value="248">장수 (248)</option>
+              <option value="251">고창군 (251)</option><option value="252">영광군 (252)</option>
+              <option value="253">김해시 (253)</option><option value="254">순창군 (254)</option>
+              <option value="255">북창원 (255)</option><option value="257">양산시 (257)</option>
+              <option value="258">보성군 (258)</option><option value="259">강진군 (259)</option>
+              <option value="260">장흥 (260)</option><option value="261">해남 (261)</option>
+              <option value="262">고흥 (262)</option><option value="263">의령군 (263)</option>
+              <option value="264">함양군 (264)</option><option value="266">광양시 (266)</option>
+              <option value="268">진도군 (268)</option><option value="271">봉화 (271)</option>
+              <option value="272">영주 (272)</option><option value="273">문경 (273)</option>
+              <option value="276">청송군 (276)</option><option value="277">영덕 (277)</option>
+              <option value="278">의성 (278)</option><option value="279">구미 (279)</option>
+              <option value="281">영천 (281)</option><option value="283">경주시 (283)</option>
+              <option value="284">거창 (284)</option><option value="285">합천 (285)</option>
+              <option value="288">밀양 (288)</option><option value="289">산청 (289)</option>
+              <option value="294">거제 (294)</option><option value="295">남해 (295)</option>
+            </select>
+          </label>
+          <label>
+            <span>지점 검색</span>
+            <input id="stationSearch" type="search" placeholder="지역명 또는 지점번호" autocomplete="off">
+          </label>
+          <button class="refresh-button" id="refreshButton" type="button"><span aria-hidden="true">↻</span> 관측값 새로고침</button>
+        </div>
+        <div class="observation-summary compact-summary">
+          <section class="observation-summary-item station-summary">
+            <span class="station-weather-icon" id="observationWeatherIcon" aria-hidden="true">☀️</span>
+            <div><p>관측지점</p><strong id="observationStation">서울</strong><small id="observationStationCode">지점 108</small></div>
+          </section>
+          <section class="observation-summary-item condition-summary">
+            <span class="summary-icon weather" aria-hidden="true">●</span>
+            <div><p>현재 기상</p><strong id="observationCondition">강수 없음</strong><small id="observationStatus">실시간 관측 정상</small></div>
+          </section>
+          <section class="observation-summary-item">
+            <span class="summary-icon" aria-hidden="true">♨</span>
+            <div><p>기온 / 습도</p><strong class="summary-values stacked-values">
+              <span><em>기온</em><b id="tempValue">23.4</b><small>°C</small></span>
+              <span><em>습도</em><b id="humidityValue">58</b><small>%</small></span>
+            </strong></div>
+          </section>
+          <section class="observation-summary-item">
+            <span class="summary-icon" aria-hidden="true">≋</span>
+            <div><p>바람 / 강수</p><strong class="summary-values stacked-values">
+              <span><em>바람</em><b id="summaryWindValue">2.1</b><small>m/s</small></span>
+              <span><em>강수</em><b id="summaryRainValue">0.0</b><small>mm</small></span>
+            </strong></div>
+          </section>
+        </div>
+        <footer class="observation-summary-footer">
+          <span><i></i> 관측자료 자동 갱신</span><time id="observationTime">최신 자료</time>
+        </footer>
+      </article>
+
+      <article class="monitor-panel hourly-panel" id="forecast">
+        <header class="panel-head">
+          <div><span class="panel-number">06</span><h2>시간별 현황</h2></div>
+          <span class="data-tag">최근 추이</span>
+        </header>
+        <div class="hour-strip" id="hourStrip">
+          <div class="hour-item"><time>14시</time><span>☀</span><strong>23°</strong></div>
+          <div class="hour-item"><time>15시</time><span>☀</span><strong>23°</strong></div>
+          <div class="hour-item"><time>16시</time><span>☀</span><strong>22°</strong></div>
+          <div class="hour-item"><time>17시</time><span>☀</span><strong>22°</strong></div>
+          <div class="hour-item"><time>18시</time><span>☾</span><strong>21°</strong></div>
+          <div class="hour-item"><time>19시</time><span>☾</span><strong>20°</strong></div>
+        </div>
+        <div class="chart" aria-label="시간별 기온 변화">
+          <div class="chart-labels"><span>26°</span><span>22°</span><span>18°</span></div>
+          <svg viewBox="0 0 720 180" role="img" aria-label="기온 변화 추세선">
+            <defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#26b6ff" stop-opacity=".24"></stop><stop offset="1" stop-color="#26b6ff" stop-opacity="0"></stop></linearGradient></defs>
+            <path class="chart-area" d="M20 42 L150 51 L280 62 L420 84 L560 108 L700 124 L700 165 L20 165 Z"></path>
+            <path class="chart-line" d="M20 42 L150 51 L280 62 L420 84 L560 108 L700 124"></path>
+            <circle cx="20" cy="42" r="5"></circle><circle cx="150" cy="51" r="5"></circle><circle cx="280" cy="62" r="5"></circle>
+            <circle cx="420" cy="84" r="5"></circle><circle cx="560" cy="108" r="5"></circle><circle cx="700" cy="124" r="5"></circle>
+          </svg>
+        </div>
+      </article>
+
+      <article class="monitor-panel empty-panel" aria-label="비어 있는 7번 패널">
+        <header class="panel-head"><div><span class="panel-number">07</span><h2></h2></div></header>
+      </article>
+
+      <article class="monitor-panel current-panel status-panel">
+        <header class="panel-head">
+          <div><span class="panel-number">08</span><h2>STATUS</h2></div>
+          <span class="panel-badge">LIVE</span>
+        </header>
+        <div class="status-overview">
+          <div><p class="station-label" id="heroStation">서울</p><div class="hero-temperature"><strong id="heroTemp">23.4</strong><span>°C</span></div><p class="condition" id="heroCondition">맑음 · 관측 양호</p></div>
+          <span class="status-line"><i></i> 정상 수신</span>
+        </div>
+        <div class="system-status">
+          <p><span><i class="ok"></i>AWS 관측</span><strong>정상</strong></p>
+          <p><span><i class="ok"></i>기상특보</span><strong>수신 중</strong></p>
+          <p><span><i class="ok"></i>HSR 레이더</span><strong>자동 재생</strong></p>
+          <p><span><i class="ok"></i>GK2A 위성영상</span><strong id="satelliteSystemStatus">동기화 중</strong></p>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>
