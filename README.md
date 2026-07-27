@@ -1,22 +1,20 @@
-# weather
+# Weather Desk
 
-기상청 AWS 관측자료와 전국 기상특보를 모아보는 Weather Desk입니다.
+기상청 API허브의 AWS 관측자료와 전국 기상특보 이미지를 한 화면에 모아보는 개인용 기상 대시보드입니다.
 
-- 홈페이지: https://weather-dashboard.limdaehyeon34.chatgpt.site
-- 인증키: 배포 환경의 `KMA_AUTH_KEY`에서 관리
-- 특보 흐름: `wrn_now_data_new.php` → 최신 `TM_FC` 선택 → `nph-wrn7` 지도 생성
-- 호환성: 새 특보현황 API 실패 시 `wrn_now_data.php`로 자동 재시도
+## 구성
 
-## 특보 모듈
+- `app/page.tsx` — 대시보드 HTML 구조
+- `public/style.css` — 반응형 화면 스타일
+- `public/script.js` — 지점 선택, 검색, 새로고침, API 연결
+- `app/api/weather/route.ts` — AWS 관측자료 프록시
+- `app/api/warnings/route.ts` — 전국 기상특보 이미지 프록시
 
-- `lib/kma/config.ts`: API 주소와 인증 설정
-- `lib/kma/http.ts`: 타임아웃이 적용된 공통 요청
-- `lib/kma/warnings.ts`: 현재 유효 특보의 발표시각 선택
-- `app/api/warnings/route.ts`: 인증키를 숨긴 이미지 프록시
+## 실행
 
-## 레이더 모듈
+```bash
+npm install
+npm run dev
+```
 
-- `lib/kma/radar.ts`: 최신 5분 HSR 시각 선택과 누락 자료 재시도
-- `app/api/radar/route.ts`: 인증키를 숨긴 공식 레이더 이미지 프록시
-- `public/js/radar.js`: 이미지 로딩·오류·수동 새로고침 제어
-- 표시 API: `nph-rdr_cmp1_img` (`HSR`, `EXT`, `ECHO`, `C4`)
+`KMA_AUTH_KEY`가 없으면 시연 데이터로 실행됩니다. 키를 환경변수로 설정하면 실시간 관측자료와 전국 특보 이미지로 자동 전환됩니다.

@@ -1,5 +1,15 @@
 const DEFAULT_TIMEOUT_MS = 12_000;
 
+export class KmaRequestError extends Error {
+  status: number;
+
+  constructor(status: number) {
+    super(`KMA request failed with ${status}`);
+    this.name = "KmaRequestError";
+    this.status = status;
+  }
+}
+
 export async function fetchKma(
   endpoint: string,
   params: URLSearchParams,
@@ -14,7 +24,7 @@ export async function fetchKma(
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new Error(`KMA request failed with ${response.status}`);
+      throw new KmaRequestError(response.status);
     }
     return response;
   } finally {

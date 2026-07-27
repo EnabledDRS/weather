@@ -2,6 +2,27 @@ import { KMA_ENDPOINTS, withAuth } from "./config";
 import { fetchKma } from "./http";
 
 const KMA_TIMESTAMP = /\b\d{12}\b/g;
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/**
+ * 특보 이미지 API가 요구하는 한국시간(YYYYMMDDHHmm)을 현재 5분
+ * 구간의 시작 시각으로 만든다. KST는 일광절약시간을 사용하지 않는다.
+ */
+export function latestFiveMinuteKstTimestamp(now = new Date()) {
+  const roundedUtcMs =
+    Math.floor(now.getTime() / FIVE_MINUTES_MS) * FIVE_MINUTES_MS;
+  const kst = new Date(roundedUtcMs + KST_OFFSET_MS);
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return [
+    kst.getUTCFullYear(),
+    pad(kst.getUTCMonth() + 1),
+    pad(kst.getUTCDate()),
+    pad(kst.getUTCHours()),
+    pad(kst.getUTCMinutes()),
+  ].join("");
+}
 
 /**
  * wrn_now_data(_new) 응답의 각 자료행에는 TM_FC, TM_EF 순으로

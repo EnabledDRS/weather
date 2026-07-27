@@ -3,6 +3,7 @@ import { fetchKma } from "./http";
 import { kstTimestamp } from "./time";
 
 const FIVE_MINUTES = 5 * 60_000;
+const RADAR_IMAGE_SIZE = "400";
 
 export function floorKstTimestampToFiveMinutes(date: Date) {
   const timestamp = kstTimestamp(date);
@@ -19,23 +20,40 @@ export function radarTimestamp(delayMinutes = 15, attempt = 0) {
 
 function radarParams(tm: string, authKey: string) {
   return withAuth({
-    tm,
-    cmp: "HSR",
-    qcd: "EXT",
-    obs: "ECHO",
+    cmp: "HSP",
     color: "C4",
-    aws: "0",
-    acc: "",
-    map: "HR",
-    grid: "2",
+    qcd: "HSO",
+    obs: "ECHO",
+    map: "HB",
+    size: RADAR_IMAGE_SIZE,
+    gis: "1",
     legend: "1",
-    size: "900",
-    itv: "5",
-    zoom_level: "0",
-    zoom_x: "0000000",
-    zoom_y: "0000000",
-    gov: "",
+    gov: "KMA",
+    center: "0",
+    wv: "0",
+    aws: "0",
+    topo: "0",
+    lightning: "0",
+    lonlat: "0",
+    lat: "35.90",
+    lon: "127.80",
+    zoom: "2",
+    ht: "1000",
+    tm,
   }, authKey);
+}
+
+export async function fetchRadarImageAt(authKey: string, tm: string) {
+  const response = await fetchKma(
+    KMA_ENDPOINTS.radarImage,
+    radarParams(tm, authKey),
+    18_000,
+  );
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.toLowerCase().startsWith("image/")) {
+    throw new Error("KMA radar response is not an image");
+  }
+  return { response, tm, contentType };
 }
 
 export async function fetchLatestRadarImage(authKey: string) {
@@ -45,16 +63,7 @@ export async function fetchLatestRadarImage(authKey: string) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const tm = radarTimestamp(15, attempt);
     try {
-      const response = await fetchKma(
-        KMA_ENDPOINTS.radarImage,
-        radarParams(tm, authKey),
-        18_000,
-      );
-      const contentType = response.headers.get("content-type") || "";
-      if (!contentType.toLowerCase().startsWith("image/")) {
-        throw new Error("KMA radar response is not an image");
-      }
-      return { response, tm, contentType };
+      return await fetchRadarImageAt(authKey, tm);
     } catch (error) {
       lastError = error;
     }

@@ -12,6 +12,9 @@ const mapPlaceholder = $("#mapPlaceholder");
 const radarImage = $("#radarImage");
 const radarPlaceholder = $("#radarPlaceholder");
 const radarUpdatedAt = $("#radarUpdatedAt");
+const satelliteImage = $("#satelliteImage");
+const satellitePlaceholder = $("#satellitePlaceholder");
+const satelliteUpdatedAt = $("#satelliteUpdatedAt");
 
 if (
   stationSelect &&
@@ -21,7 +24,10 @@ if (
   mapPlaceholder &&
   radarImage &&
   radarPlaceholder &&
-  radarUpdatedAt
+  radarUpdatedAt &&
+  satelliteImage &&
+  satellitePlaceholder &&
+  satelliteUpdatedAt
 ) {
   const stations = createStationController(stationSelect, stationSearch);
   const warnings = createWarningController(warningImage, mapPlaceholder);
@@ -29,6 +35,9 @@ if (
     radarImage,
     radarPlaceholder,
     radarUpdatedAt,
+    satelliteImage,
+    satellitePlaceholder,
+    satelliteUpdatedAt,
   );
   const refreshWeather = () => loadWeather(stationSelect, refreshButton);
 
