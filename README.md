@@ -13,3 +13,10 @@
 - `lib/kma/http.ts`: 타임아웃이 적용된 공통 요청
 - `lib/kma/warnings.ts`: 현재 유효 특보의 발표시각 선택
 - `app/api/warnings/route.ts`: 인증키를 숨긴 이미지 프록시
+
+## 레이더 모듈
+
+- `lib/kma/radar.ts`: 최신 5분 HSR 시각 선택과 누락 자료 재시도
+- `app/api/radar/route.ts`: 인증키를 숨긴 공식 레이더 이미지 프록시
+- `public/js/radar.js`: 이미지 로딩·오류·수동 새로고침 제어
+- 표시 API: `nph-rdr_cmp1_img` (`HSR`, `EXT`, `ECHO`, `C4`)
