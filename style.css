@@ -86,6 +86,7 @@ main { min-width: 0; }
 .control-title, .section-head > div:first-child { display: flex; align-items: center; gap: 12px; }
 .section-number { color: var(--blue); letter-spacing: .14em; font-size: 11px; font-weight: 850; }
 .control-title h2, .section-head h2 { margin: 0; font-size: 19px; }
+.station-count { display: inline-block; margin-left: 7px; padding: 4px 8px; vertical-align: 2px; color: var(--blue); border-radius: 99px; background: #eaf4ff; font-size: 10px; font-weight: 800; }
 .control-title p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
 .select-wrap, .search-wrap { display: grid; gap: 5px; }
 .select-wrap > span, .search-wrap > span { color: #76899a; font-size: 10px; font-weight: 750; }
