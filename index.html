@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="기상청 AWS 관측자료와 전국 기상특보를 한 화면에서 확인하는 개인 기상 대시보드">
+  <title>Weather Desk | 기상 관제 대시보드</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="주 메뉴">
+      <a class="brand" href="#" aria-label="Weather Desk 홈">
+        <span class="brand-mark"><i></i></span>
+        <span>기상청<small>KMA</small></span>
+      </a>
+      <nav>
+        <a class="active" href="#dashboard"><span>⌂</span>대시보드</a>
+        <a href="#observations"><span>⌁</span>관측</a>
+        <a href="#forecast"><span>☁</span>예보</a>
+        <a href="#warnings"><span>⚑</span>특보</a>
+      </nav>
+      <p class="sidebar-foot">기상청 API 기반<br>개인 기상 관제실</p>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="menu-button" type="button" aria-label="메뉴 열기">☰</button>
+        <div>
+          <p class="eyebrow">KOREA WEATHER MONITOR</p>
+          <h1>WEATHER DESK</h1>
+        </div>
+        <div class="update-status">
+          <span class="live-dot"></span>
+          <span id="dataMode">시연 데이터</span>
+          <time id="updatedAt">업데이트 중</time>
+        </div>
+      </header>
+
+      <div class="dashboard" id="dashboard">
+        <section class="overview-grid">
+          <article class="hero-card">
+            <div class="hero-copy">
+              <span class="sun" aria-hidden="true">☀</span>
+              <div>
+                <p class="station-label" id="heroStation">서울</p>
+                <div class="hero-temperature"><strong id="heroTemp">23.4</strong><span>°C</span></div>
+                <p class="condition">맑음 · 관측 양호</p>
+              </div>
+            </div>
+            <div class="city-line" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </article>
+
+          <div class="metrics" aria-label="현재 관측값">
+            <article class="metric-card"><span class="metric-icon">♨</span><p>기온</p><strong><span id="tempValue">23.4</span><small>°C</small></strong></article>
+            <article class="metric-card"><span class="metric-icon">♧</span><p>습도</p><strong><span id="humidityValue">58</span><small>%</small></strong></article>
+            <article class="metric-card"><span class="metric-icon">≋</span><p>풍속</p><strong><span id="windValue">2.1</span><small>m/s</small></strong></article>
+            <article class="metric-card"><span class="metric-icon">♢</span><p>강수</p><strong><span id="rainValue">0.0</span><small>mm</small></strong></article>
+          </div>
+        </section>
+
+        <section class="control-card" id="observations">
+          <div class="control-title">
+            <span class="section-number">01</span>
+            <div><h2>AWS 관측소</h2><p>관측 지점을 선택해 최신 값을 확인하세요.</p></div>
+          </div>
+          <label class="select-wrap">
+            <span>관측 지점</span>
+            <select id="stationSelect">
+              <option value="108">서울 (108)</option>
+              <option value="112">인천 (112)</option>
+              <option value="119">수원 (119)</option>
+              <option value="105">강릉 (105)</option>
+              <option value="133">대전 (133)</option>
+              <option value="143">대구 (143)</option>
+              <option value="156">광주 (156)</option>
+              <option value="159">부산 (159)</option>
+              <option value="184">제주 (184)</option>
+            </select>
+          </label>
+          <label class="search-wrap">
+            <span>지점 검색</span>
+            <input id="stationSearch" type="search" placeholder="지역명 또는 지점번호">
+          </label>
+          <button class="refresh-button" id="refreshButton" type="button"><span>↻</span> 새로고침</button>
+        </section>
+
+        <section class="content-grid">
+          <article class="hourly-card" id="forecast">
+            <div class="section-head">
+              <div><span class="section-number">02</span><h2>시간별 현황</h2></div>
+              <span class="data-tag">최근 관측 추이</span>
+            </div>
+            <div class="hour-strip" id="hourStrip"></div>
+            <div class="chart" aria-label="시간별 기온 변화">
+              <div class="chart-labels"><span>26°</span><span>22°</span><span>18°</span></div>
+              <svg viewBox="0 0 720 180" role="img" aria-label="기온 하락 추세선">
+                <defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1677e8" stop-opacity=".2"/><stop offset="1" stop-color="#1677e8" stop-opacity="0"/></linearGradient></defs>
+                <path class="chart-area" d="M20 42 L118 51 L216 56 L314 72 L412 94 L510 110 L608 119 L700 124 L700 165 L20 165 Z"/>
+                <path class="chart-line" d="M20 42 L118 51 L216 56 L314 72 L412 94 L510 110 L608 119 L700 124"/>
+                <g class="chart-points"></g>
+              </svg>
+            </div>
+          </article>
+
+          <article class="warning-card" id="warnings">
+            <div class="section-head">
+              <div><span class="section-number">03</span><h2>전국 기상특보</h2></div>
+              <div class="legend"><span><i class="blue"></i>호우</span><span><i class="green"></i>강풍</span><span><i class="red"></i>폭염</span></div>
+            </div>
+            <div class="warning-map">
+              <img id="warningImage" alt="전국 기상특보 현황 지도">
+              <div class="map-placeholder" id="mapPlaceholder">
+                <div class="radar-rings"><i></i><i></i><i></i></div>
+                <strong>전국 특보 지도</strong>
+                <p>API 백엔드 연결 후<br>실시간 이미지가 표시됩니다.</p>
+              </div>
+            </div>
+            <footer>
+              <p><span class="status-dot"></span> 특보 발효 기준</p>
+              <button id="mapRefresh" type="button">지도 새로고침 ↻</button>
+            </footer>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
